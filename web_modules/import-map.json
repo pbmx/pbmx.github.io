@@ -1,0 +1,6 @@
+{
+  "imports": {
+    "pbmx-web": "./pbmx-web.js",
+    "vue": "./vue.js"
+  }
+}

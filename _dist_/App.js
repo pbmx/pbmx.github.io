@@ -1,19 +1,25 @@
 import './App.css.proxy.js';
 
+import game from "./game.js";
+
 const defaultExport = {
-  data() {
-    return {
-      message: "Welcome to PBMX"
-    };
-  }
+    components: { game },
+    data() {
+        return {
+        };
+    }
 };
 
-import { toDisplayString as _toDisplayString, createVNode as _createVNode, openBlock as _openBlock, createBlock as _createBlock } from "/web_modules/vue.js"
+import { resolveComponent as _resolveComponent, createVNode as _createVNode, openBlock as _openBlock, createBlock as _createBlock } from "/web_modules/vue.js"
 
-const _hoisted_1 = { class: "App" }
+const _hoisted_1 = { class: "app" }
 
 export function render(_ctx, _cache) {
-  return (_openBlock(), _createBlock("div", _hoisted_1, _toDisplayString(_ctx.message), 1))
+  const _component_game = _resolveComponent("game")
+
+  return (_openBlock(), _createBlock("div", _hoisted_1, [
+    _createVNode(_component_game)
+  ]))
 }
 
 defaultExport.render = render

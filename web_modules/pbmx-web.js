@@ -131,6 +131,133 @@ function handleError(f) {
 }
 /**
 */
+class Block {
+
+    static __wrap(ptr) {
+        const obj = Object.create(Block.prototype);
+        obj.ptr = ptr;
+
+        return obj;
+    }
+
+    free() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+
+        wasm.__wbg_block_free(ptr);
+    }
+    /**
+    * @returns {string}
+    */
+    export() {
+        try {
+            wasm.block_export(8, this.ptr);
+            var r0 = getInt32Memory0()[8 / 4 + 0];
+            var r1 = getInt32Memory0()[8 / 4 + 1];
+            return getStringFromWasm0(r0, r1);
+        } finally {
+            wasm.__wbindgen_free(r0, r1);
+        }
+    }
+    /**
+    * @param {string} s
+    * @returns {Block}
+    */
+    static import(s) {
+        var ptr0 = passStringToWasm0(s, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        var len0 = WASM_VECTOR_LEN;
+        var ret = wasm.block_import(ptr0, len0);
+        return Block.__wrap(ret);
+    }
+}
+/**
+*/
+class BlockBuilder {
+
+    static __wrap(ptr) {
+        const obj = Object.create(BlockBuilder.prototype);
+        obj.ptr = ptr;
+
+        return obj;
+    }
+
+    free() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+
+        wasm.__wbg_blockbuilder_free(ptr);
+    }
+    /**
+    * @param {Payload} payload
+    */
+    addPayload(payload) {
+        _assertClass(payload, Payload);
+        var ptr0 = payload.ptr;
+        payload.ptr = 0;
+        wasm.blockbuilder_addPayload(this.ptr, ptr0);
+    }
+    /**
+    * @param {PrivateKey} sk
+    * @returns {Block}
+    */
+    build(sk) {
+        var ptr = this.ptr;
+        this.ptr = 0;
+        _assertClass(sk, PrivateKey);
+        var ret = wasm.blockbuilder_build(ptr, sk.ptr);
+        return Block.__wrap(ret);
+    }
+}
+/**
+*/
+class Chain {
+
+    static __wrap(ptr) {
+        const obj = Object.create(Chain.prototype);
+        obj.ptr = ptr;
+
+        return obj;
+    }
+
+    free() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+
+        wasm.__wbg_chain_free(ptr);
+    }
+    /**
+    * @returns {Chain}
+    */
+    static new() {
+        var ret = wasm.chain_new();
+        return Chain.__wrap(ret);
+    }
+    /**
+    * @returns {number}
+    */
+    count() {
+        var ret = wasm.chain_count(this.ptr);
+        return ret >>> 0;
+    }
+    /**
+    * @returns {BlockBuilder}
+    */
+    buildBlock() {
+        var ret = wasm.chain_buildBlock(this.ptr);
+        return BlockBuilder.__wrap(ret);
+    }
+    /**
+    * @param {Block} block
+    */
+    addBlock(block) {
+        _assertClass(block, Block);
+        var ptr0 = block.ptr;
+        block.ptr = 0;
+        wasm.chain_addBlock(this.ptr, ptr0);
+    }
+}
+/**
+*/
 class Fingerprint {
 
     static __wrap(ptr) {
@@ -172,6 +299,45 @@ class Fingerprint {
 }
 /**
 */
+class Payload {
+
+    static __wrap(ptr) {
+        const obj = Object.create(Payload.prototype);
+        obj.ptr = ptr;
+
+        return obj;
+    }
+
+    free() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+
+        wasm.__wbg_payload_free(ptr);
+    }
+    /**
+    * @returns {Fingerprint}
+    */
+    id() {
+        var ret = wasm.payload_id(this.ptr);
+        return Fingerprint.__wrap(ret);
+    }
+    /**
+    * @param {string} name
+    * @param {PublicKey} pk
+    * @returns {Payload}
+    */
+    static publishKey(name, pk) {
+        var ptr0 = passStringToWasm0(name, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        var len0 = WASM_VECTOR_LEN;
+        _assertClass(pk, PublicKey);
+        var ptr1 = pk.ptr;
+        pk.ptr = 0;
+        var ret = wasm.payload_publishKey(ptr0, len0, ptr1);
+        return Payload.__wrap(ret);
+    }
+}
+/**
+*/
 class PrivateKey {
 
     static __wrap(ptr) {
@@ -197,8 +363,8 @@ class PrivateKey {
     /**
     * @returns {PublicKey}
     */
-    public_key() {
-        var ret = wasm.privatekey_public_key(this.ptr);
+    publicKey() {
+        var ret = wasm.privatekey_publicKey(this.ptr);
         return PublicKey.__wrap(ret);
     }
     /**
@@ -296,22 +462,33 @@ class Vtmf {
     */
     static new(sk) {
         _assertClass(sk, PrivateKey);
-        var ret = wasm.vtmf_new(sk.ptr);
+        var ptr0 = sk.ptr;
+        sk.ptr = 0;
+        var ret = wasm.vtmf_new(ptr0);
         return Vtmf.__wrap(ret);
     }
     /**
     * @returns {PrivateKey}
     */
-    private_key() {
-        var ret = wasm.vtmf_private_key(this.ptr);
+    privateKey() {
+        var ret = wasm.vtmf_privateKey(this.ptr);
         return PrivateKey.__wrap(ret);
     }
     /**
     * @returns {PublicKey}
     */
-    shared_key() {
-        var ret = wasm.vtmf_shared_key(this.ptr);
+    sharedKey() {
+        var ret = wasm.vtmf_sharedKey(this.ptr);
         return PublicKey.__wrap(ret);
+    }
+    /**
+    * @param {PublicKey} key
+    */
+    addKey(key) {
+        _assertClass(key, PublicKey);
+        var ptr0 = key.ptr;
+        key.ptr = 0;
+        wasm.vtmf_addKey(this.ptr, ptr0);
     }
 }
 
@@ -425,4 +602,4 @@ async function init(input) {
 }
 
 export default init;
-export { Fingerprint, PrivateKey, PublicKey, Vtmf };
+export { Block, BlockBuilder, Chain, Fingerprint, Payload, PrivateKey, PublicKey, Vtmf };

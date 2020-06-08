@@ -1,12 +1,11 @@
-import * as pbmx from "/web_modules/pbmx-web.js";
+import {PrivateKey} from "/web_modules/pbmx-web.js";
 function init() {
   return new Promise((resolve, reject) => {
     const existing = localStorage.getItem("privateKey");
     if (!existing) {
-      const key = pbmx.PrivateKey.random();
-      localStorage.setItem("privateKey", key.export());
+      localStorage.setItem("privateKey", PrivateKey.random().export());
     } else {
-      pbmx.PrivateKey.import(existing);
+      PrivateKey.import(existing);
     }
     const req = indexedDB.open("pbmx", 1);
     req.onupgradeneeded = function() {
@@ -33,6 +32,6 @@ function init() {
 }
 export function getPrivateKey() {
   const base64 = localStorage.getItem("privateKey");
-  return pbmx.PrivateKey.import(base64);
+  return PrivateKey.import(base64);
 }
 export default init;

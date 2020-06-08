@@ -1,20 +1,16 @@
 import './game.css.proxy.js';
 
-import parties from "./parties.js";
 import stacks from "./stacks.js";
 import rngs from "./rngs.js";
 import details from "./details.js";
 
 import { getPrivateKey } from "./storage.js";
+import { Chain, Vtmf, Payload } from "/web_modules/pbmx-web.js";
 
 const tabs = [
     {
         name: "Details",
         component: details
-    },
-    {
-        name: "Parties",
-        component: parties
     },
     {
         name: "Stacks",
@@ -31,17 +27,40 @@ const defaultExport = {
         return {
             tabs: tabs,
             currentTab: tabs[0],
-            privateKey: getPrivateKey()
+            vtmf: Vtmf.new(getPrivateKey()),
+            chain: Chain.new(),
+            stacks: [],
+            rngs: [],
+            players: [],
+            chainRef: true,
         };
     },
     computed: {
-        fingerprint() {
-            return this.privateKey.public_key().fingerprint().export();
+        gameFingerprint() {
+            return this.vtmf.sharedKey().fingerprint().export();
+        },
+        playerFingerprint() {
+            return this.vtmf.privateKey().publicKey().fingerprint().export();
+        },
+        blocks() {
+            this.chainRef;
+            return this.chain.count();
+        }
+    },
+    methods: {
+        addBlock() {
+            const sk = this.vtmf.privateKey();
+            const builder = this.chain.buildBlock();
+            builder.addPayload(Payload.publishKey("test", sk.publicKey()));
+            const block = builder.build(sk);
+            console.log(block.export());
+            this.chain.addBlock(block);
+            this.chainRef = !this.chainRef;
         }
     }
 };
 
-import { renderList as _renderList, Fragment as _Fragment, openBlock as _openBlock, createBlock as _createBlock, toDisplayString as _toDisplayString, resolveDynamicComponent as _resolveDynamicComponent, createVNode as _createVNode } from "/web_modules/vue.js"
+import { renderList as _renderList, Fragment as _Fragment, openBlock as _openBlock, createBlock as _createBlock, toDisplayString as _toDisplayString, resolveDynamicComponent as _resolveDynamicComponent, createVNode as _createVNode, createTextVNode as _createTextVNode } from "/web_modules/vue.js"
 
 const _hoisted_1 = { class: "game" }
 
@@ -54,7 +73,11 @@ export function render(_ctx, _cache) {
         onClick: $event => (_ctx.currentTab = tab)
       }, _toDisplayString(tab.name), 11, ["onClick"]))
     }), 128 /* KEYED_FRAGMENT */)),
-    (_openBlock(), _createBlock(_resolveDynamicComponent(_ctx.currentTab.component), { class: "tab" }))
+    (_openBlock(), _createBlock(_resolveDynamicComponent(_ctx.currentTab.component), { class: "tab" })),
+    _createTextVNode(" " + _toDisplayString(_ctx.blocks) + " ", 1 /* TEXT */),
+    _createVNode("button", {
+      onClick: _cache[1] || (_cache[1] = $event => (_ctx.addBlock($event)))
+    }, "Add empty block")
   ]))
 }
 

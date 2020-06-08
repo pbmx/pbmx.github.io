@@ -24,7 +24,6 @@ const defaultExport = {
         return {
             tabs: tabs,
             currentTab: tabs[0],
-            gameRef: true
         };
     }
 };

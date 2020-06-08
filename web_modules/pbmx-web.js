@@ -368,25 +368,34 @@ class Game {
         return BlockBuilder.__wrap(ret);
     }
     /**
+    * @param {Block} block
+    */
+    addBlock(block) {
+        _assertClass(block, Block);
+        var ptr0 = block.ptr;
+        block.ptr = 0;
+        wasm.game_addBlock(this.ptr, ptr0);
+    }
+    /**
     * @param {BlockBuilder} builder
     * @returns {Block}
     */
-    addBlock(builder) {
+    finishBlock(builder) {
         _assertClass(builder, BlockBuilder);
         var ptr0 = builder.ptr;
         builder.ptr = 0;
-        var ret = wasm.game_addBlock(this.ptr, ptr0);
+        var ret = wasm.game_finishBlock(this.ptr, ptr0);
         return Block.__wrap(ret);
     }
     /**
     * @param {string} name
-    * @returns {Block}
+    * @returns {BlockBuilder}
     */
     join(name) {
         var ptr0 = passStringToWasm0(name, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         var len0 = WASM_VECTOR_LEN;
         var ret = wasm.game_join(this.ptr, ptr0, len0);
-        return Block.__wrap(ret);
+        return BlockBuilder.__wrap(ret);
     }
     /**
     * @returns {Fingerprint}

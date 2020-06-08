@@ -1,48 +1,42 @@
 import './details.css.proxy.js';
 
 import identifier from "./identifier.js";
+import { saveBlock } from "./storage.js";
+import { getGame, mutGame } from "./state.js";
 
 const defaultExport = {
     components: { identifier },
     data() {
         return {
             name: null,
-            gameRef: this.$parent.gameRef
         };
     },
     computed: {
         gameFingerprint() {
-            this.gameRef;
-            return window.game.fingerprint().export();
+            return getGame().fingerprint().export();
         },
         playerFingerprint() {
-            this.gameRef;
-            return window.game.playerFingerprint().export();
+            return getGame().playerFingerprint().export();
         },
         players() {
-            this.gameRef;
-            return window.game.playerCount();
+            return getGame().playerCount();
         },
         blocks() {
-            this.gameRef;
-            return window.game.blockCount();
+            return getGame().blockCount();
         },
         joined() {
-            this.gameRef;
-            return window.game.joined();
+            return getGame().joined();
         }
     },
     methods: {
-        join() {
-            console.log("joining as " + this.name);
-            const block = window.game.join(this.name);
-            console.log(block.export());
-            this.gameRef = !this.gameRef;
+        async join() {
+            const block = mutGame(g => g.finishBlock(g.join(this.name)));
+            await saveBlock(block);
         }
     }
 };
 
-import { resolveComponent as _resolveComponent, createVNode as _createVNode, toDisplayString as _toDisplayString, vModelText as _vModelText, withDirectives as _withDirectives, createTextVNode as _createTextVNode, openBlock as _openBlock, createBlock as _createBlock, createCommentVNode as _createCommentVNode } from "/web_modules/vue.js"
+import { resolveComponent as _resolveComponent, createVNode as _createVNode, createCommentVNode as _createCommentVNode, toDisplayString as _toDisplayString, vModelText as _vModelText, withDirectives as _withDirectives, createTextVNode as _createTextVNode, openBlock as _openBlock, createBlock as _createBlock } from "/web_modules/vue.js"
 
 const _hoisted_1 = { class: "view" }
 const _hoisted_2 = { key: 0 }
@@ -52,10 +46,13 @@ export function render(_ctx, _cache) {
   const _component_identifier = _resolveComponent("identifier")
 
   return (_openBlock(), _createBlock("div", _hoisted_1, [
-    _createVNode(_component_identifier, {
-      label: "Game Fingerprint",
-      value: _ctx.gameFingerprint
-    }, null, 8, ["value"]),
+    (_ctx.players > 0)
+      ? _createVNode(_component_identifier, {
+          key: 0,
+          label: "Game Fingerprint",
+          value: _ctx.gameFingerprint
+        }, null, 8, ["value"])
+      : _createCommentVNode("", true),
     _createVNode(_component_identifier, {
       label: "Your Fingerprint",
       value: _ctx.playerFingerprint

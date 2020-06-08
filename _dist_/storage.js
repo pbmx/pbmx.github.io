@@ -1,6 +1,6 @@
-import {PrivateKey} from "/web_modules/pbmx-web.js";
+import {PrivateKey, Block} from "/web_modules/pbmx-web.js";
 let db;
-function init() {
+export default function() {
   return new Promise((resolve, reject) => {
     const existing = localStorage.getItem("privateKey");
     if (!existing) {
@@ -36,4 +36,45 @@ export function getPrivateKey() {
   const base64 = window.localStorage.getItem("privateKey");
   return PrivateKey.import(base64);
 }
-export default init;
+export function saveBlock(block, game) {
+  return new Promise((resolve, reject) => {
+    if (!game) {
+      game = "default";
+    }
+    const obj = {
+      id: block.id().export(),
+      data: block.export(),
+      game
+    };
+    const tx = db.transaction("blocks", "readwrite");
+    const req = tx.objectStore("blocks").add(obj);
+    req.onsuccess = function() {
+      resolve();
+    };
+    req.onerror = function() {
+      reject(req.error);
+    };
+  });
+}
+function getBlocksFor(game) {
+  return new Promise((resolve, reject) => {
+    if (!game) {
+      game = "default";
+    }
+    const tx = db.transaction("blocks");
+    const idx = tx.objectStore("blocks").index("game");
+    const req = idx.getAll(game);
+    req.onsuccess = function() {
+      resolve(req.result);
+    };
+    req.onerror = function() {
+      reject(req.error);
+    };
+  });
+}
+export async function loadBlocks(game) {
+  let blocks = await getBlocksFor(game.name);
+  for (const b of blocks) {
+    game.addBlock(Block.import(b.data));
+  }
+}

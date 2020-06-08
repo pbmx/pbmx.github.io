@@ -45,19 +45,24 @@ function takeObject(idx) {
     return ret;
 }
 
-function _assertClass(instance, klass) {
-    if (!(instance instanceof klass)) {
-        throw new Error(`expected instance of ${klass.name}`);
-    }
-    return instance.ptr;
-}
-
 let cachegetInt32Memory0 = null;
 function getInt32Memory0() {
     if (cachegetInt32Memory0 === null || cachegetInt32Memory0.buffer !== wasm.memory.buffer) {
         cachegetInt32Memory0 = new Int32Array(wasm.memory.buffer);
     }
     return cachegetInt32Memory0;
+}
+
+let cachegetUint32Memory0 = null;
+function getUint32Memory0() {
+    if (cachegetUint32Memory0 === null || cachegetUint32Memory0.buffer !== wasm.memory.buffer) {
+        cachegetUint32Memory0 = new Uint32Array(wasm.memory.buffer);
+    }
+    return cachegetUint32Memory0;
+}
+
+function getArrayU32FromWasm0(ptr, len) {
+    return getUint32Memory0().subarray(ptr / 4, ptr / 4 + len);
 }
 
 let WASM_VECTOR_LEN = 0;
@@ -115,6 +120,27 @@ function passStringToWasm0(arg, malloc, realloc) {
     return ptr;
 }
 
+function _assertClass(instance, klass) {
+    if (!(instance instanceof klass)) {
+        throw new Error(`expected instance of ${klass.name}`);
+    }
+    return instance.ptr;
+}
+
+function passArray32ToWasm0(arg, malloc) {
+    const ptr = malloc(arg.length * 4);
+    getUint32Memory0().set(arg, ptr / 4);
+    WASM_VECTOR_LEN = arg.length;
+    return ptr;
+}
+
+function passArray8ToWasm0(arg, malloc) {
+    const ptr = malloc(arg.length * 1);
+    getUint8Memory0().set(arg, ptr / 1);
+    WASM_VECTOR_LEN = arg.length;
+    return ptr;
+}
+
 function getArrayU8FromWasm0(ptr, len) {
     return getUint8Memory0().subarray(ptr / 1, ptr / 1 + len);
 }
@@ -145,6 +171,31 @@ class Block {
         this.ptr = 0;
 
         wasm.__wbg_block_free(ptr);
+    }
+    /**
+    * @returns {Fingerprint}
+    */
+    id() {
+        var ret = wasm.block_id(this.ptr);
+        return Fingerprint.__wrap(ret);
+    }
+    /**
+    * @returns {Fingerprint}
+    */
+    signer() {
+        var ret = wasm.block_signer(this.ptr);
+        return Fingerprint.__wrap(ret);
+    }
+    /**
+    * @returns {Uint32Array}
+    */
+    parentIds() {
+        wasm.block_parentIds(8, this.ptr);
+        var r0 = getInt32Memory0()[8 / 4 + 0];
+        var r1 = getInt32Memory0()[8 / 4 + 1];
+        var v0 = getArrayU32FromWasm0(r0, r1).slice();
+        wasm.__wbindgen_free(r0, r1 * 4);
+        return v0;
     }
     /**
     * @returns {string}
@@ -210,50 +261,13 @@ class BlockBuilder {
 }
 /**
 */
-class Chain {
-
-    static __wrap(ptr) {
-        const obj = Object.create(Chain.prototype);
-        obj.ptr = ptr;
-
-        return obj;
-    }
+class EntanglementProof {
 
     free() {
         const ptr = this.ptr;
         this.ptr = 0;
 
-        wasm.__wbg_chain_free(ptr);
-    }
-    /**
-    * @returns {Chain}
-    */
-    static new() {
-        var ret = wasm.chain_new();
-        return Chain.__wrap(ret);
-    }
-    /**
-    * @returns {number}
-    */
-    count() {
-        var ret = wasm.chain_count(this.ptr);
-        return ret >>> 0;
-    }
-    /**
-    * @returns {BlockBuilder}
-    */
-    buildBlock() {
-        var ret = wasm.chain_buildBlock(this.ptr);
-        return BlockBuilder.__wrap(ret);
-    }
-    /**
-    * @param {Block} block
-    */
-    addBlock(block) {
-        _assertClass(block, Block);
-        var ptr0 = block.ptr;
-        block.ptr = 0;
-        wasm.chain_addBlock(this.ptr, ptr0);
+        wasm.__wbg_entanglementproof_free(ptr);
     }
 }
 /**
@@ -299,6 +313,120 @@ class Fingerprint {
 }
 /**
 */
+class Game {
+
+    static __wrap(ptr) {
+        const obj = Object.create(Game.prototype);
+        obj.ptr = ptr;
+
+        return obj;
+    }
+
+    free() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+
+        wasm.__wbg_game_free(ptr);
+    }
+    /**
+    * @param {PrivateKey} sk
+    * @returns {Game}
+    */
+    static new(sk) {
+        _assertClass(sk, PrivateKey);
+        var ptr0 = sk.ptr;
+        sk.ptr = 0;
+        var ret = wasm.game_new(ptr0);
+        return Game.__wrap(ret);
+    }
+    /**
+    * @returns {number}
+    */
+    blockCount() {
+        var ret = wasm.game_blockCount(this.ptr);
+        return ret >>> 0;
+    }
+    /**
+    * @returns {number}
+    */
+    playerCount() {
+        var ret = wasm.game_playerCount(this.ptr);
+        return ret >>> 0;
+    }
+    /**
+    * @returns {boolean}
+    */
+    joined() {
+        var ret = wasm.game_joined(this.ptr);
+        return ret !== 0;
+    }
+    /**
+    * @returns {BlockBuilder}
+    */
+    buildBlock() {
+        var ret = wasm.game_buildBlock(this.ptr);
+        return BlockBuilder.__wrap(ret);
+    }
+    /**
+    * @param {BlockBuilder} builder
+    * @returns {Block}
+    */
+    addBlock(builder) {
+        _assertClass(builder, BlockBuilder);
+        var ptr0 = builder.ptr;
+        builder.ptr = 0;
+        var ret = wasm.game_addBlock(this.ptr, ptr0);
+        return Block.__wrap(ret);
+    }
+    /**
+    * @param {string} name
+    * @returns {Block}
+    */
+    join(name) {
+        var ptr0 = passStringToWasm0(name, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        var len0 = WASM_VECTOR_LEN;
+        var ret = wasm.game_join(this.ptr, ptr0, len0);
+        return Block.__wrap(ret);
+    }
+    /**
+    * @returns {Fingerprint}
+    */
+    fingerprint() {
+        var ret = wasm.game_fingerprint(this.ptr);
+        return Fingerprint.__wrap(ret);
+    }
+    /**
+    * @returns {Fingerprint}
+    */
+    playerFingerprint() {
+        var ret = wasm.game_playerFingerprint(this.ptr);
+        return Fingerprint.__wrap(ret);
+    }
+}
+/**
+*/
+class Mask {
+
+    free() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+
+        wasm.__wbg_mask_free(ptr);
+    }
+}
+/**
+*/
+class MaskProof {
+
+    free() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+
+        wasm.__wbg_maskproof_free(ptr);
+    }
+}
+/**
+*/
 class Payload {
 
     static __wrap(ptr) {
@@ -333,6 +461,218 @@ class Payload {
         var ptr1 = pk.ptr;
         pk.ptr = 0;
         var ret = wasm.payload_publishKey(ptr0, len0, ptr1);
+        return Payload.__wrap(ret);
+    }
+    /**
+    * @param {Stack} stk
+    * @returns {Payload}
+    */
+    static openStack(stk) {
+        _assertClass(stk, Stack);
+        var ptr0 = stk.ptr;
+        stk.ptr = 0;
+        var ret = wasm.payload_openStack(ptr0);
+        return Payload.__wrap(ret);
+    }
+    /**
+    * @param {Fingerprint} id
+    * @param {Stack} stk
+    * @param {Uint32Array} proofs
+    * @returns {Payload}
+    */
+    static maskStack(id, stk, proofs) {
+        _assertClass(id, Fingerprint);
+        var ptr0 = id.ptr;
+        id.ptr = 0;
+        _assertClass(stk, Stack);
+        var ptr1 = stk.ptr;
+        stk.ptr = 0;
+        var ptr2 = passArray32ToWasm0(proofs, wasm.__wbindgen_malloc);
+        var len2 = WASM_VECTOR_LEN;
+        var ret = wasm.payload_maskStack(ptr0, ptr1, ptr2, len2);
+        return Payload.__wrap(ret);
+    }
+    /**
+    * @param {Fingerprint} id
+    * @param {Stack} stk
+    * @param {ShuffleProof} proof
+    * @returns {Payload}
+    */
+    static shuffleStack(id, stk, proof) {
+        _assertClass(id, Fingerprint);
+        var ptr0 = id.ptr;
+        id.ptr = 0;
+        _assertClass(stk, Stack);
+        var ptr1 = stk.ptr;
+        stk.ptr = 0;
+        _assertClass(proof, ShuffleProof);
+        var ptr2 = proof.ptr;
+        proof.ptr = 0;
+        var ret = wasm.payload_shuffleStack(ptr0, ptr1, ptr2);
+        return Payload.__wrap(ret);
+    }
+    /**
+    * @param {Fingerprint} id
+    * @param {Stack} stk
+    * @param {RotationProof} proof
+    * @returns {Payload}
+    */
+    static rotateStack(id, stk, proof) {
+        _assertClass(id, Fingerprint);
+        var ptr0 = id.ptr;
+        id.ptr = 0;
+        _assertClass(stk, Stack);
+        var ptr1 = stk.ptr;
+        stk.ptr = 0;
+        _assertClass(proof, RotationProof);
+        var ptr2 = proof.ptr;
+        proof.ptr = 0;
+        var ret = wasm.payload_rotateStack(ptr0, ptr1, ptr2);
+        return Payload.__wrap(ret);
+    }
+    /**
+    * @param {Fingerprint} id
+    * @param {string} name
+    * @returns {Payload}
+    */
+    static nameStack(id, name) {
+        _assertClass(id, Fingerprint);
+        var ptr0 = id.ptr;
+        id.ptr = 0;
+        var ptr1 = passStringToWasm0(name, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        var len1 = WASM_VECTOR_LEN;
+        var ret = wasm.payload_nameStack(ptr0, ptr1, len1);
+        return Payload.__wrap(ret);
+    }
+    /**
+    * @param {Fingerprint} id1
+    * @param {Uint32Array} indices
+    * @param {Fingerprint} id2
+    * @returns {Payload}
+    */
+    static takeStack(id1, indices, id2) {
+        _assertClass(id1, Fingerprint);
+        var ptr0 = id1.ptr;
+        id1.ptr = 0;
+        var ptr1 = passArray32ToWasm0(indices, wasm.__wbindgen_malloc);
+        var len1 = WASM_VECTOR_LEN;
+        _assertClass(id2, Fingerprint);
+        var ptr2 = id2.ptr;
+        id2.ptr = 0;
+        var ret = wasm.payload_takeStack(ptr0, ptr1, len1, ptr2);
+        return Payload.__wrap(ret);
+    }
+    /**
+    * @param {Uint32Array} ids
+    * @param {Fingerprint} id
+    * @returns {Payload}
+    */
+    static pileStacks(ids, id) {
+        var ptr0 = passArray32ToWasm0(ids, wasm.__wbindgen_malloc);
+        var len0 = WASM_VECTOR_LEN;
+        _assertClass(id, Fingerprint);
+        var ptr1 = id.ptr;
+        id.ptr = 0;
+        var ret = wasm.payload_pileStacks(ptr0, len0, ptr1);
+        return Payload.__wrap(ret);
+    }
+    /**
+    * @param {Fingerprint} id
+    * @param {Uint32Array} shares
+    * @param {Uint32Array} proofs
+    * @returns {Payload}
+    */
+    static publishShares(id, shares, proofs) {
+        _assertClass(id, Fingerprint);
+        var ptr0 = id.ptr;
+        id.ptr = 0;
+        var ptr1 = passArray32ToWasm0(shares, wasm.__wbindgen_malloc);
+        var len1 = WASM_VECTOR_LEN;
+        var ptr2 = passArray32ToWasm0(proofs, wasm.__wbindgen_malloc);
+        var len2 = WASM_VECTOR_LEN;
+        var ret = wasm.payload_publishShares(ptr0, ptr1, len1, ptr2, len2);
+        return Payload.__wrap(ret);
+    }
+    /**
+    * @param {string} name
+    * @param {string} spec
+    * @returns {Payload}
+    */
+    static randomSpec(name, spec) {
+        var ptr0 = passStringToWasm0(name, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        var len0 = WASM_VECTOR_LEN;
+        var ptr1 = passStringToWasm0(spec, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        var len1 = WASM_VECTOR_LEN;
+        var ret = wasm.payload_randomSpec(ptr0, len0, ptr1, len1);
+        return Payload.__wrap(ret);
+    }
+    /**
+    * @param {string} name
+    * @param {Mask} entropy
+    * @returns {Payload}
+    */
+    static randomEntropy(name, entropy) {
+        var ptr0 = passStringToWasm0(name, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        var len0 = WASM_VECTOR_LEN;
+        _assertClass(entropy, Mask);
+        var ptr1 = entropy.ptr;
+        entropy.ptr = 0;
+        var ret = wasm.payload_randomEntropy(ptr0, len0, ptr1);
+        return Payload.__wrap(ret);
+    }
+    /**
+    * @param {string} name
+    * @param {SecretShare} share
+    * @param {SecretShareProof} proof
+    * @returns {Payload}
+    */
+    static randomReveal(name, share, proof) {
+        var ptr0 = passStringToWasm0(name, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        var len0 = WASM_VECTOR_LEN;
+        _assertClass(share, SecretShare);
+        var ptr1 = share.ptr;
+        share.ptr = 0;
+        _assertClass(proof, SecretShareProof);
+        var ptr2 = proof.ptr;
+        proof.ptr = 0;
+        var ret = wasm.payload_randomReveal(ptr0, len0, ptr1, ptr2);
+        return Payload.__wrap(ret);
+    }
+    /**
+    * @param {Uint32Array} ids1
+    * @param {Uint32Array} ids2
+    * @param {EntanglementProof} proof
+    * @returns {Payload}
+    */
+    static proveEntanglement(ids1, ids2, proof) {
+        var ptr0 = passArray32ToWasm0(ids1, wasm.__wbindgen_malloc);
+        var len0 = WASM_VECTOR_LEN;
+        var ptr1 = passArray32ToWasm0(ids2, wasm.__wbindgen_malloc);
+        var len1 = WASM_VECTOR_LEN;
+        _assertClass(proof, EntanglementProof);
+        var ptr2 = proof.ptr;
+        proof.ptr = 0;
+        var ret = wasm.payload_proveEntanglement(ptr0, len0, ptr1, len1, ptr2);
+        return Payload.__wrap(ret);
+    }
+    /**
+    * @param {string} s
+    * @returns {Payload}
+    */
+    static text(s) {
+        var ptr0 = passStringToWasm0(s, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        var len0 = WASM_VECTOR_LEN;
+        var ret = wasm.payload_text(ptr0, len0);
+        return Payload.__wrap(ret);
+    }
+    /**
+    * @param {Uint8Array} b
+    * @returns {Payload}
+    */
+    static bytes(b) {
+        var ptr0 = passArray8ToWasm0(b, wasm.__wbindgen_malloc);
+        var len0 = WASM_VECTOR_LEN;
+        var ret = wasm.payload_bytes(ptr0, len0);
         return Payload.__wrap(ret);
     }
 }
@@ -441,54 +781,64 @@ class PublicKey {
 }
 /**
 */
-class Vtmf {
-
-    static __wrap(ptr) {
-        const obj = Object.create(Vtmf.prototype);
-        obj.ptr = ptr;
-
-        return obj;
-    }
+class RotationProof {
 
     free() {
         const ptr = this.ptr;
         this.ptr = 0;
 
-        wasm.__wbg_vtmf_free(ptr);
+        wasm.__wbg_rotationproof_free(ptr);
+    }
+}
+/**
+*/
+class SecretShare {
+
+    free() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+
+        wasm.__wbg_secretshare_free(ptr);
+    }
+}
+/**
+*/
+class SecretShareProof {
+
+    free() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+
+        wasm.__wbg_secretshareproof_free(ptr);
+    }
+}
+/**
+*/
+class ShuffleProof {
+
+    free() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+
+        wasm.__wbg_shuffleproof_free(ptr);
+    }
+}
+/**
+*/
+class Stack {
+
+    free() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+
+        wasm.__wbg_stack_free(ptr);
     }
     /**
-    * @param {PrivateKey} sk
-    * @returns {Vtmf}
+    * @returns {Fingerprint}
     */
-    static new(sk) {
-        _assertClass(sk, PrivateKey);
-        var ptr0 = sk.ptr;
-        sk.ptr = 0;
-        var ret = wasm.vtmf_new(ptr0);
-        return Vtmf.__wrap(ret);
-    }
-    /**
-    * @returns {PrivateKey}
-    */
-    privateKey() {
-        var ret = wasm.vtmf_privateKey(this.ptr);
-        return PrivateKey.__wrap(ret);
-    }
-    /**
-    * @returns {PublicKey}
-    */
-    sharedKey() {
-        var ret = wasm.vtmf_sharedKey(this.ptr);
-        return PublicKey.__wrap(ret);
-    }
-    /**
-    * @param {PublicKey} key
-    */
-    addKey(key) {
-        _assertClass(key, PublicKey);
-        var ptr0 = key.ptr;
-        key.ptr = 0;
-        wasm.vtmf_addKey(this.ptr, ptr0);
+    id() {
+        var ret = wasm.stack_id(this.ptr);
+        return Fingerprint.__wrap(ret);
     }
 }
 
@@ -602,4 +952,4 @@ async function init(input) {
 }
 
 export default init;
-export { Block, BlockBuilder, Chain, Fingerprint, Payload, PrivateKey, PublicKey, Vtmf };
+export { Block, BlockBuilder, EntanglementProof, Fingerprint, Game, Mask, MaskProof, Payload, PrivateKey, PublicKey, RotationProof, SecretShare, SecretShareProof, ShuffleProof, Stack };

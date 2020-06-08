@@ -1,0 +1,10 @@
+
+.identifier {
+}
+.identifier .label {
+    font-size: 80%;
+}
+.identifier .value {
+    font-family: monospace;
+    font-size: 120%;
+}

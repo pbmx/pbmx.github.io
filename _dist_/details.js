@@ -35,7 +35,7 @@ const defaultExport = {
         async join() {
             const block = mutGame(g => g.finishBlock(g.join(this.name)));
             await saveBlock(block);
-            this.$parent.exportedBlock = block;
+            this.$parent.exportedBlock = block.export();
         },
         async addBlock() {
             this.addingBlock = true;

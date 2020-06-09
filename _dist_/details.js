@@ -3,12 +3,15 @@ import './details.css.proxy.js';
 import identifier from "./identifier.js";
 import { saveBlock } from "./storage.js";
 import { getGame, mutGame } from "./state.js";
+import { Block } from "/web_modules/pbmx-web.js";
 
 const defaultExport = {
     components: { identifier },
     data() {
         return {
             name: null,
+            newBlock: null,
+            addingBlock: false,
         };
     },
     computed: {
@@ -32,6 +35,13 @@ const defaultExport = {
         async join() {
             const block = mutGame(g => g.finishBlock(g.join(this.name)));
             await saveBlock(block);
+            this.$parent.exportedBlock = block;
+        },
+        async addBlock() {
+            this.addingBlock = true;
+            const block = mutGame(g => g.addBlock(Block.import(this.newBlock)));
+            await saveBlock(block);
+            this.addingBlock = false;
         }
     }
 };
@@ -71,7 +81,23 @@ export function render(_ctx, _cache) {
             onClick: _cache[2] || (_cache[2] = $event => (_ctx.join($event)))
           }, "Join")
         ]))
-      : _createCommentVNode("", true)
+      : _createCommentVNode("", true),
+    _createVNode("div", null, [
+      _createVNode("div", null, [
+        _withDirectives(_createVNode("textarea", {
+          "onUpdate:modelValue": _cache[3] || (_cache[3] = $event => (_ctx.newBlock = $event)),
+          readonly: _ctx.addingBlock,
+          class: "block",
+          placeholder: "paste a block here"
+        }, null, 8, ["readonly"]), [
+          [_vModelText, _ctx.newBlock]
+        ])
+      ]),
+      _createVNode("button", {
+        onClick: _cache[4] || (_cache[4] = $event => (_ctx.addBlock($event))),
+        disabled: !_ctx.newBlock || _ctx.addingBlock
+      }, "Add block", 8, ["disabled"])
+    ])
   ]))
 }
 

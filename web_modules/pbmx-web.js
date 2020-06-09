@@ -369,12 +369,14 @@ class Game {
     }
     /**
     * @param {Block} block
+    * @returns {Block}
     */
     addBlock(block) {
         _assertClass(block, Block);
         var ptr0 = block.ptr;
         block.ptr = 0;
-        wasm.game_addBlock(this.ptr, ptr0);
+        var ret = wasm.game_addBlock(this.ptr, ptr0);
+        return Block.__wrap(ret);
     }
     /**
     * @param {BlockBuilder} builder

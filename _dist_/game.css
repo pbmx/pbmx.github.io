@@ -21,3 +21,8 @@
 .tab-button.active {
     background: #e0e0e0;
 }
+.block {
+    width: 400px;
+    height: 120px;
+    font-family: monospace;
+}

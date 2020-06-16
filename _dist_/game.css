@@ -2,6 +2,9 @@
 .game {
 }
 .tab {
+    display: inline-block;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
     border: 1px solid #ccc;
     padding: 10px;
 }
@@ -21,7 +24,19 @@
 .tab-button.active {
     background: #e0e0e0;
 }
-.block {
+.export-block {
+    display: inline-block;
+    border-radius: 3px;
+    border: 1px solid #ccc;
+    padding: 10px;
+}
+pre.block {
+    display: inline-block;
+    border-radius: 3px;
+    border: 1px solid #000;
+    padding: 10px;
+}
+textarea.block {
     width: 400px;
     height: 120px;
     font-family: monospace;

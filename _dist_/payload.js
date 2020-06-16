@@ -1,15 +1,13 @@
-import './identifier.css.proxy.js';
+import './payload.css.proxy.js';
 
 const defaultExport = {
-    props: ["value"]
+    props: ["payload"],
 };
 
 import { toDisplayString as _toDisplayString, createVNode as _createVNode, openBlock as _openBlock, createBlock as _createBlock } from "/web_modules/vue.js"
 
-const _hoisted_1 = { class: "identifier" }
-
 export function render(_ctx, _cache) {
-  return (_openBlock(), _createBlock("div", _hoisted_1, _toDisplayString(_ctx.value), 1))
+  return (_openBlock(), _createBlock("div", null, _toDisplayString(_ctx.payload.kind()), 1))
 }
 
 defaultExport.render = render

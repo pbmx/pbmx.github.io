@@ -1,5 +1,5 @@
 
-const code = "\n.view {\n}\n";
+const code = "\n";
 
 const styleEl = document.createElement("style");
 const codeEl = document.createTextNode(code);

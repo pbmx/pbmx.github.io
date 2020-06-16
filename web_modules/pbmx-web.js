@@ -1,5 +1,25 @@
 let wasm;
 
+const heap = new Array(32).fill(undefined);
+
+heap.push(undefined, null, true, false);
+
+function getObject(idx) { return heap[idx]; }
+
+let heap_next = heap.length;
+
+function dropObject(idx) {
+    if (idx < 36) return;
+    heap[idx] = heap_next;
+    heap_next = idx;
+}
+
+function takeObject(idx) {
+    const ret = getObject(idx);
+    dropObject(idx);
+    return ret;
+}
+
 let cachedTextDecoder = new TextDecoder('utf-8', { ignoreBOM: true, fatal: true });
 
 cachedTextDecoder.decode();
@@ -16,12 +36,6 @@ function getStringFromWasm0(ptr, len) {
     return cachedTextDecoder.decode(getUint8Memory0().subarray(ptr, ptr + len));
 }
 
-const heap = new Array(32).fill(undefined);
-
-heap.push(undefined, null, true, false);
-
-let heap_next = heap.length;
-
 function addHeapObject(obj) {
     if (heap_next === heap.length) heap.push(heap.length + 1);
     const idx = heap_next;
@@ -31,38 +45,12 @@ function addHeapObject(obj) {
     return idx;
 }
 
-function getObject(idx) { return heap[idx]; }
-
-function dropObject(idx) {
-    if (idx < 36) return;
-    heap[idx] = heap_next;
-    heap_next = idx;
-}
-
-function takeObject(idx) {
-    const ret = getObject(idx);
-    dropObject(idx);
-    return ret;
-}
-
 let cachegetInt32Memory0 = null;
 function getInt32Memory0() {
     if (cachegetInt32Memory0 === null || cachegetInt32Memory0.buffer !== wasm.memory.buffer) {
         cachegetInt32Memory0 = new Int32Array(wasm.memory.buffer);
     }
     return cachegetInt32Memory0;
-}
-
-let cachegetUint32Memory0 = null;
-function getUint32Memory0() {
-    if (cachegetUint32Memory0 === null || cachegetUint32Memory0.buffer !== wasm.memory.buffer) {
-        cachegetUint32Memory0 = new Uint32Array(wasm.memory.buffer);
-    }
-    return cachegetUint32Memory0;
-}
-
-function getArrayU32FromWasm0(ptr, len) {
-    return getUint32Memory0().subarray(ptr / 4, ptr / 4 + len);
 }
 
 let WASM_VECTOR_LEN = 0;
@@ -127,6 +115,14 @@ function _assertClass(instance, klass) {
     return instance.ptr;
 }
 
+let cachegetUint32Memory0 = null;
+function getUint32Memory0() {
+    if (cachegetUint32Memory0 === null || cachegetUint32Memory0.buffer !== wasm.memory.buffer) {
+        cachegetUint32Memory0 = new Uint32Array(wasm.memory.buffer);
+    }
+    return cachegetUint32Memory0;
+}
+
 function passArray32ToWasm0(arg, malloc) {
     const ptr = malloc(arg.length * 4);
     getUint32Memory0().set(arg, ptr / 4);
@@ -187,15 +183,18 @@ class Block {
         return Fingerprint.__wrap(ret);
     }
     /**
-    * @returns {Uint32Array}
+    * @returns {Array<any>}
     */
     parentIds() {
-        wasm.block_parentIds(8, this.ptr);
-        var r0 = getInt32Memory0()[8 / 4 + 0];
-        var r1 = getInt32Memory0()[8 / 4 + 1];
-        var v0 = getArrayU32FromWasm0(r0, r1).slice();
-        wasm.__wbindgen_free(r0, r1 * 4);
-        return v0;
+        var ret = wasm.block_parentIds(this.ptr);
+        return takeObject(ret);
+    }
+    /**
+    * @returns {Array<any>}
+    */
+    payloads() {
+        var ret = wasm.block_payloads(this.ptr);
+        return takeObject(ret);
     }
     /**
     * @returns {string}
@@ -347,11 +346,32 @@ class Game {
         return ret >>> 0;
     }
     /**
+    * @returns {Array<any>}
+    */
+    blocks() {
+        var ret = wasm.game_blocks(this.ptr);
+        return takeObject(ret);
+    }
+    /**
+    * @returns {Array<any>}
+    */
+    payloads() {
+        var ret = wasm.game_payloads(this.ptr);
+        return takeObject(ret);
+    }
+    /**
     * @returns {number}
     */
     playerCount() {
         var ret = wasm.game_playerCount(this.ptr);
         return ret >>> 0;
+    }
+    /**
+    * @returns {Map<any, any>}
+    */
+    players() {
+        var ret = wasm.game_players(this.ptr);
+        return takeObject(ret);
     }
     /**
     * @returns {boolean}
@@ -459,6 +479,19 @@ class Payload {
     id() {
         var ret = wasm.payload_id(this.ptr);
         return Fingerprint.__wrap(ret);
+    }
+    /**
+    * @returns {string}
+    */
+    kind() {
+        try {
+            wasm.payload_kind(8, this.ptr);
+            var r0 = getInt32Memory0()[8 / 4 + 0];
+            var r1 = getInt32Memory0()[8 / 4 + 1];
+            return getStringFromWasm0(r0, r1);
+        } finally {
+            wasm.__wbindgen_free(r0, r1);
+        }
     }
     /**
     * @param {string} name
@@ -892,12 +925,24 @@ async function init(input) {
     }
     const imports = {};
     imports.wbg = {};
+    imports.wbg.__wbindgen_object_drop_ref = function(arg0) {
+        takeObject(arg0);
+    };
     imports.wbg.__wbindgen_string_new = function(arg0, arg1) {
         var ret = getStringFromWasm0(arg0, arg1);
         return addHeapObject(ret);
     };
-    imports.wbg.__wbindgen_object_drop_ref = function(arg0) {
-        takeObject(arg0);
+    imports.wbg.__wbg_block_new = function(arg0) {
+        var ret = Block.__wrap(arg0);
+        return addHeapObject(ret);
+    };
+    imports.wbg.__wbg_payload_new = function(arg0) {
+        var ret = Payload.__wrap(arg0);
+        return addHeapObject(ret);
+    };
+    imports.wbg.__wbg_fingerprint_new = function(arg0) {
+        var ret = Fingerprint.__wrap(arg0);
+        return addHeapObject(ret);
     };
     imports.wbg.__wbg_getRandomValues_4e0354b1f3d14f64 = handleError(function(arg0, arg1, arg2) {
         var ret = getObject(arg0).getRandomValues(getArrayU8FromWasm0(arg1, arg2));
@@ -911,6 +956,14 @@ async function init(input) {
         var ret = getObject(arg0).crypto;
         return addHeapObject(ret);
     });
+    imports.wbg.__wbg_new_0d50725e1ae68303 = function() {
+        var ret = new Array();
+        return addHeapObject(ret);
+    };
+    imports.wbg.__wbg_push_46274b393147c746 = function(arg0, arg1) {
+        var ret = getObject(arg0).push(getObject(arg1));
+        return ret;
+    };
     imports.wbg.__wbg_newnoargs_8aad4a6554f38345 = function(arg0, arg1) {
         var ret = new Function(getStringFromWasm0(arg0, arg1));
         return addHeapObject(ret);
@@ -919,6 +972,14 @@ async function init(input) {
         var ret = getObject(arg0).call(getObject(arg1));
         return addHeapObject(ret);
     });
+    imports.wbg.__wbg_new_a45b9dd970cba377 = function() {
+        var ret = new Map();
+        return addHeapObject(ret);
+    };
+    imports.wbg.__wbg_set_c650e980d45ef82c = function(arg0, arg1, arg2) {
+        var ret = getObject(arg0).set(getObject(arg1), getObject(arg2));
+        return addHeapObject(ret);
+    };
     imports.wbg.__wbg_self_c0d3a5923e013647 = handleError(function() {
         var ret = self.self;
         return addHeapObject(ret);

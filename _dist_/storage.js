@@ -32,6 +32,18 @@ export default function() {
     };
   });
 }
+export function debugReset() {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction("blocks", "readwrite");
+    const req = tx.objectStore("blocks").clear();
+    req.onsuccess = function() {
+      resolve();
+    };
+    req.onerror = function() {
+      reject(req.error);
+    };
+  });
+}
 export function getPrivateKey() {
   const base64 = window.localStorage.getItem("privateKey");
   return PrivateKey.import(base64);

@@ -49,7 +49,7 @@ export function render(_ctx, _cache) {
         _withDirectives(_createVNode("textarea", {
           "onUpdate:modelValue": _cache[1] || (_cache[1] = $event => (_ctx.newBlock = $event)),
           readonly: _ctx.addingBlock,
-          class: "block",
+          class: "block-input",
           placeholder: "paste a block here"
         }, null, 8, ["readonly"]), [
           [_vModelText, _ctx.newBlock]

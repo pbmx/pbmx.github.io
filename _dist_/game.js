@@ -47,7 +47,7 @@ const _hoisted_1 = { class: "game" }
 const _hoisted_2 = { key: 0 }
 const _hoisted_3 = { class: "export-block" }
 const _hoisted_4 = /*#__PURE__*/_createTextVNode(" Copy this block and broadcast it to the other players ")
-const _hoisted_5 = { class: "block" }
+const _hoisted_5 = { class: "block-output" }
 
 export function render(_ctx, _cache) {
   return (_openBlock(), _createBlock("div", _hoisted_1, [
@@ -67,12 +67,15 @@ export function render(_ctx, _cache) {
             _hoisted_4,
             _createVNode("div", null, [
               _createVNode("pre", _hoisted_5, _toDisplayString(_ctx.exportedBlock), 1)
-            ])
+            ]),
+            _createVNode("button", {
+              onClick: _cache[1] || (_cache[1] = $event => (_ctx.exportedBlock = null))
+            }, "Done")
           ])
         ]))
       : _createCommentVNode("", true),
     _createVNode("button", {
-      onClick: _cache[1] || (_cache[1] = $event => (_ctx.resetGame($event)))
+      onClick: _cache[2] || (_cache[2] = $event => (_ctx.resetGame($event)))
     }, "RESET")
   ]))
 }

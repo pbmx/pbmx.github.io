@@ -22,7 +22,7 @@ const defaultExport = {
         players() {
             const arr = [];
             for(const player of getGame().players()) {
-                arr.push({ name: player[1], id: shortFingerprint(player[0].export()) });
+                arr.push({ name: player[1], id: shortFingerprint(player[0]) });
             }
             return arr;
         },
@@ -34,6 +34,7 @@ const defaultExport = {
         async join() {
             const block = mutGame(g => g.finishBlock(g.join(this.name)));
             await saveBlock(block);
+            this.$parent.lastBlock = block;
             this.$parent.exportedBlock = formatBase64(block.export());
         },
     },

@@ -5,6 +5,7 @@ import rngs from "./rngs.js";
 import blocks from "./blocks.js";
 import details from "./details.js";
 import { debugReset } from "./storage.js";
+import { pushBlock } from "./exchange.js";
 
 const tabs = [
     {
@@ -30,6 +31,7 @@ const defaultExport = {
         return {
             tabs: tabs,
             currentTab: tabs[0],
+            lastBlock: null,
             exportedBlock: null,
         };
     },
@@ -37,6 +39,10 @@ const defaultExport = {
         async resetGame() {
             await debugReset();
             location.reload();
+        },
+        async publishBlock() {
+            await pushBlock(this.lastBlock);
+            this.exportedBlock = null;
         }
     },
 };
@@ -69,13 +75,16 @@ export function render(_ctx, _cache) {
               _createVNode("pre", _hoisted_5, _toDisplayString(_ctx.exportedBlock), 1)
             ]),
             _createVNode("button", {
-              onClick: _cache[1] || (_cache[1] = $event => (_ctx.exportedBlock = null))
+              onClick: _cache[1] || (_cache[1] = $event => (_ctx.publishBlock($event)))
+            }, "Publish"),
+            _createVNode("button", {
+              onClick: _cache[2] || (_cache[2] = $event => (_ctx.exportedBlock = null))
             }, "Done")
           ])
         ]))
       : _createCommentVNode("", true),
     _createVNode("button", {
-      onClick: _cache[2] || (_cache[2] = $event => (_ctx.resetGame($event)))
+      onClick: _cache[3] || (_cache[3] = $event => (_ctx.resetGame($event)))
     }, "RESET")
   ]))
 }

@@ -68,6 +68,30 @@ export function saveBlock(block, game) {
     };
   });
 }
+export function hasBlock(id) {
+  return new Promise((resolve, reject) => {
+    getBlock(id).then(() => resolve(true), (e) => {
+      if (e instanceof DataError) {
+        resolve(false);
+      } else {
+        reject(e);
+      }
+    });
+  });
+}
+function getBlock(id) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction("blocks");
+    const store = tx.objectStore("blocks");
+    const req = store.get(id);
+    req.onsuccess = function() {
+      resolve(req.result);
+    };
+    req.onerror = function() {
+      reject(req.error);
+    };
+  });
+}
 function getBlocksFor(game) {
   return new Promise((resolve, reject) => {
     if (!game) {

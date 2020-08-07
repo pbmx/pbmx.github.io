@@ -1,8 +1,9 @@
 import './blocks.css.proxy.js';
 
 import block from "./block.js";
-import { saveBlock } from "./storage.js";
+import { saveBlock, hasBlock } from "./storage.js";
 import { getGame, mutGame } from "./state.js";
+import { pullBlocks } from "./exchange.js";
 import { Block } from "/web_modules/pbmx-web.js";
 
 function glue(str) {
@@ -28,11 +29,22 @@ const defaultExport = {
     methods: {
         async addBlock() {
             this.addingBlock = true;
-            const block = mutGame(g => g.addBlock(Block.import(glue(this.newBlock))));
-            await saveBlock(block);
+            const block = Block.import(glue(this.newBlock));
+            await saveBlock(mutGame(g => g.addBlock(block)));
             this.newBlock = null;
             this.addingBlock = false;
         },
+        async fetchBlocks() {
+            this.addingBlock = true;
+            let blocks = await pullBlocks();
+            for(const raw of blocks) {
+                const block = Block.import(raw);
+                if(!await hasBlock(block.id().export())) {
+                    await saveBlock(mutGame(g => g.addBlock(block)));
+                }
+            }
+            this.addingBlock = false;
+        }
     },
 };
 
@@ -58,7 +70,11 @@ export function render(_ctx, _cache) {
       _createVNode("button", {
         onClick: _cache[2] || (_cache[2] = $event => (_ctx.addBlock($event))),
         disabled: !_ctx.newBlock || _ctx.addingBlock
-      }, "Add block", 8, ["disabled"])
+      }, "Add block", 8, ["disabled"]),
+      _createVNode("button", {
+        onClick: _cache[3] || (_cache[3] = $event => (_ctx.fetchBlocks($event))),
+        disabled: _ctx.addingBlock
+      }, "Fetch blocks", 8, ["disabled"])
     ]),
     _createVNode("div", null, "Blocks: " + _toDisplayString(_ctx.blockCount), 1),
     _createVNode("div", null, [

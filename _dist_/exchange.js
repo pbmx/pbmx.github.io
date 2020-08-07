@@ -1,12 +1,11 @@
 import autobahn from "/web_modules/autobahn-browser.js";
 import {getGame} from "./state.js";
-window.AUTOBAHN_DEBUG = false;
 let server = {
   url: "wss://pbmx.herokuapp.com/ws",
   realm: "pbmx"
 };
-const newBlockTopic = "io.pbmx.block.new";
-const getBlocksTopic = "io.pbmx.block.get";
+const newBlockTopic = "io.pbmx.block.push";
+const pullBlocksTopic = "io.pbmx.block.pull";
 export function setServer(url = "wss://pbmx.herokuapp.com/ws", realm = "pbmx") {
   server = {
     url,
@@ -32,13 +31,13 @@ export function pushBlock(block) {
     conn.open();
   });
 }
-export function getBlocks(days = 7) {
+export function pullBlocks(days = 7) {
   return new Promise((resolve, reject) => {
     const gameId = getGame().fingerprint().export();
     const conn = new autobahn.Connection(server);
     conn.onopen = (session) => {
       const args = [gameId, days];
-      session.call(getBlocksTopic, args).then((r) => {
+      session.call(pullBlocksTopic, args).then((r) => {
         conn.close();
         resolve(r);
       }, (e) => reject(e));

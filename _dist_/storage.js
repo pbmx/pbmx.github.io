@@ -2,9 +2,9 @@ import {PrivateKey, Block} from "/web_modules/pbmx-web.js";
 let db;
 export default function() {
   return new Promise((resolve, reject) => {
-    const existing = localStorage.getItem("privateKey");
+    const existing = window.localStorage.getItem("privateKey");
     if (!existing) {
-      localStorage.setItem("privateKey", PrivateKey.random().export());
+      window.localStorage.setItem("privateKey", PrivateKey.random().export());
     } else {
       PrivateKey.import(existing);
     }
@@ -44,15 +44,10 @@ export function getPrivateKey() {
 }
 function saveGame(tx, gameObj) {
   return new Promise((resolve, reject) => {
-    const req = tx.objectStore("games").add(gameObj);
+    const req = tx.objectStore("games").put(gameObj);
     req.onsuccess = resolve;
     req.onerror = () => {
-      console.log(req.error);
-      if (req.error instanceof ConstraintError) {
-        resolve();
-      } else {
-        reject(req.error);
-      }
+      reject(req.error);
     };
   });
 }
@@ -79,7 +74,9 @@ export function saveBlock(block, gameId) {
 }
 export function hasBlock(id) {
   return new Promise((resolve, reject) => {
-    getBlock(id).then(() => resolve(true), (e) => {
+    getBlock(id).then((r) => {
+      resolve(!!r);
+    }, (e) => {
       if (e instanceof DataError) {
         resolve(false);
       } else {

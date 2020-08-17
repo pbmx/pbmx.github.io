@@ -36,7 +36,7 @@ const defaultExport = {
         },
         async fetchBlocks() {
             this.addingBlock = true;
-            let blocks = await pullBlocks();
+            const blocks = await pullBlocks();
             for(const raw of blocks) {
                 const block = Block.import(raw);
                 if(!await hasBlock(block.id().export())) {

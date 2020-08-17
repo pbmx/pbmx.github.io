@@ -433,6 +433,13 @@ class Game {
         var ret = wasm.game_playerFingerprint(this.ptr);
         return Fingerprint.__wrap(ret);
     }
+    /**
+    * @returns {Map<any, any>}
+    */
+    rngs() {
+        var ret = wasm.game_rngs(this.ptr);
+        return takeObject(ret);
+    }
 }
 /**
 */
@@ -825,6 +832,24 @@ class PublicKey {
 }
 /**
 */
+class Rng {
+
+    static __wrap(ptr) {
+        const obj = Object.create(Rng.prototype);
+        obj.ptr = ptr;
+
+        return obj;
+    }
+
+    free() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+
+        wasm.__wbg_rng_free(ptr);
+    }
+}
+/**
+*/
 class RotationProof {
 
     free() {
@@ -940,6 +965,10 @@ async function init(input) {
         var ret = Payload.__wrap(arg0);
         return addHeapObject(ret);
     };
+    imports.wbg.__wbg_rng_new = function(arg0) {
+        var ret = Rng.__wrap(arg0);
+        return addHeapObject(ret);
+    };
     imports.wbg.__wbg_fingerprint_new = function(arg0) {
         var ret = Fingerprint.__wrap(arg0);
         return addHeapObject(ret);
@@ -1024,4 +1053,4 @@ async function init(input) {
 }
 
 export default init;
-export { Block, BlockBuilder, EntanglementProof, Fingerprint, Game, Mask, MaskProof, Payload, PrivateKey, PublicKey, RotationProof, SecretShare, SecretShareProof, ShuffleProof, Stack };
+export { Block, BlockBuilder, EntanglementProof, Fingerprint, Game, Mask, MaskProof, Payload, PrivateKey, PublicKey, Rng, RotationProof, SecretShare, SecretShareProof, ShuffleProof, Stack };

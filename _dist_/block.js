@@ -1,12 +1,11 @@
 import './block.css.proxy.js';
 
-import identifier from "./identifier.js";
 import payload from "./payload.js";
 import { getGame } from "./state.js";
 import { shortFingerprint } from "./display.js";
 
 const defaultExport = {
-    components: { identifier, payload },
+    components: { payload },
     props: ["block"],
     computed: {
         id() {

@@ -30,7 +30,7 @@ const defaultExport = {
         async addBlock() {
             this.addingBlock = true;
             const block = Block.import(glue(this.newBlock));
-            await saveBlock(mutGame(g => g.addBlock(block)));
+            await saveBlock(mutGame(g => g.addBlock(block)), getGame().id);
             this.newBlock = null;
             this.addingBlock = false;
         },
@@ -40,7 +40,7 @@ const defaultExport = {
             for(const raw of blocks) {
                 const block = Block.import(raw);
                 if(!await hasBlock(block.id().export())) {
-                    await saveBlock(mutGame(g => g.addBlock(block)));
+                    await saveBlock(mutGame(g => g.addBlock(block)), getGame().id);
                 }
             }
             this.addingBlock = false;

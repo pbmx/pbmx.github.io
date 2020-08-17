@@ -1,5 +1,11 @@
 import './rngs.css.proxy.js';
 
+import { getGame } from "./state.js";
+//import block from "./block.vue";
+//import { saveBlock, hasBlock } from "./storage.js";
+//import { pullBlocks } from "./exchange.js";
+//import { Block } from "pbmx-web";
+
 const defaultExport = {
     data() {
         return {

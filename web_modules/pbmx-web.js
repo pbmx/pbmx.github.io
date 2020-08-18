@@ -137,6 +137,10 @@ function passArray8ToWasm0(arg, malloc) {
     return ptr;
 }
 
+const u32CvtShim = new Uint32Array(2);
+
+const uint64CvtShim = new BigUint64Array(u32CvtShim.buffer);
+
 function getArrayU8FromWasm0(ptr, len) {
     return getUint8Memory0().subarray(ptr / 1, ptr / 1 + len);
 }
@@ -440,10 +444,33 @@ class Game {
         var ret = wasm.game_rngs(this.ptr);
         return takeObject(ret);
     }
+    /**
+    * @returns {Mask}
+    */
+    maskRandom() {
+        var ret = wasm.game_maskRandom(this.ptr);
+        return Mask.__wrap(ret);
+    }
+    /**
+    * @param {Mask} mask
+    * @returns {Array<any>}
+    */
+    unmaskShare(mask) {
+        _assertClass(mask, Mask);
+        var ret = wasm.game_unmaskShare(this.ptr, mask.ptr);
+        return takeObject(ret);
+    }
 }
 /**
 */
 class Mask {
+
+    static __wrap(ptr) {
+        const obj = Object.create(Mask.prototype);
+        obj.ptr = ptr;
+
+        return obj;
+    }
 
     free() {
         const ptr = this.ptr;
@@ -848,17 +875,6 @@ class Rng {
         wasm.__wbg_rng_free(ptr);
     }
     /**
-    * @param {number} parties
-    * @param {string} spec
-    * @returns {Rng}
-    */
-    static new(parties, spec) {
-        var ptr0 = passStringToWasm0(spec, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        var len0 = WASM_VECTOR_LEN;
-        var ret = wasm.rng_new(parties, ptr0, len0);
-        return Rng.__wrap(ret);
-    }
-    /**
     * @returns {string}
     */
     spec() {
@@ -870,6 +886,42 @@ class Rng {
         } finally {
             wasm.__wbindgen_free(r0, r1);
         }
+    }
+    /**
+    * @returns {Mask}
+    */
+    mask() {
+        var ret = wasm.rng_mask(this.ptr);
+        return Mask.__wrap(ret);
+    }
+    /**
+    * @param {Game} game
+    * @returns {string}
+    */
+    state(game) {
+        try {
+            _assertClass(game, Game);
+            wasm.rng_state(8, this.ptr, game.ptr);
+            var r0 = getInt32Memory0()[8 / 4 + 0];
+            var r1 = getInt32Memory0()[8 / 4 + 1];
+            return getStringFromWasm0(r0, r1);
+        } finally {
+            wasm.__wbindgen_free(r0, r1);
+        }
+    }
+    /**
+    * @param {Game} game
+    * @returns {BigInt}
+    */
+    value(game) {
+        _assertClass(game, Game);
+        wasm.rng_value(8, this.ptr, game.ptr);
+        var r0 = getInt32Memory0()[8 / 4 + 0];
+        var r1 = getInt32Memory0()[8 / 4 + 1];
+        u32CvtShim[0] = r0;
+        u32CvtShim[1] = r1;
+        const n0 = uint64CvtShim[0];
+        return n0;
     }
 }
 /**
@@ -887,6 +939,13 @@ class RotationProof {
 */
 class SecretShare {
 
+    static __wrap(ptr) {
+        const obj = Object.create(SecretShare.prototype);
+        obj.ptr = ptr;
+
+        return obj;
+    }
+
     free() {
         const ptr = this.ptr;
         this.ptr = 0;
@@ -897,6 +956,13 @@ class SecretShare {
 /**
 */
 class SecretShareProof {
+
+    static __wrap(ptr) {
+        const obj = Object.create(SecretShareProof.prototype);
+        obj.ptr = ptr;
+
+        return obj;
+    }
 
     free() {
         const ptr = this.ptr;
@@ -977,10 +1043,6 @@ async function init(input) {
     imports.wbg.__wbindgen_object_drop_ref = function(arg0) {
         takeObject(arg0);
     };
-    imports.wbg.__wbindgen_string_new = function(arg0, arg1) {
-        var ret = getStringFromWasm0(arg0, arg1);
-        return addHeapObject(ret);
-    };
     imports.wbg.__wbg_block_new = function(arg0) {
         var ret = Block.__wrap(arg0);
         return addHeapObject(ret);
@@ -995,6 +1057,18 @@ async function init(input) {
     };
     imports.wbg.__wbg_fingerprint_new = function(arg0) {
         var ret = Fingerprint.__wrap(arg0);
+        return addHeapObject(ret);
+    };
+    imports.wbg.__wbg_secretshare_new = function(arg0) {
+        var ret = SecretShare.__wrap(arg0);
+        return addHeapObject(ret);
+    };
+    imports.wbg.__wbg_secretshareproof_new = function(arg0) {
+        var ret = SecretShareProof.__wrap(arg0);
+        return addHeapObject(ret);
+    };
+    imports.wbg.__wbindgen_string_new = function(arg0, arg1) {
+        var ret = getStringFromWasm0(arg0, arg1);
         return addHeapObject(ret);
     };
     imports.wbg.__wbg_getRandomValues_4e0354b1f3d14f64 = handleError(function(arg0, arg1, arg2) {

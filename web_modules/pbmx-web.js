@@ -847,6 +847,30 @@ class Rng {
 
         wasm.__wbg_rng_free(ptr);
     }
+    /**
+    * @param {number} parties
+    * @param {string} spec
+    * @returns {Rng}
+    */
+    static new(parties, spec) {
+        var ptr0 = passStringToWasm0(spec, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        var len0 = WASM_VECTOR_LEN;
+        var ret = wasm.rng_new(parties, ptr0, len0);
+        return Rng.__wrap(ret);
+    }
+    /**
+    * @returns {string}
+    */
+    spec() {
+        try {
+            wasm.rng_spec(8, this.ptr);
+            var r0 = getInt32Memory0()[8 / 4 + 0];
+            var r1 = getInt32Memory0()[8 / 4 + 1];
+            return getStringFromWasm0(r0, r1);
+        } finally {
+            wasm.__wbindgen_free(r0, r1);
+        }
+    }
 }
 /**
 */

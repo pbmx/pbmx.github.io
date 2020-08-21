@@ -21,8 +21,15 @@ const defaultExport = {
     },
     methods: {
         async provide() {
+            const mask = getGame().maskRandom();
+            this.rng.addEntropy(getGame().playerFingerprint(), mask);
+
             const builder = getGame().buildBlock();
-            builder.addPayload(Payload.randomEntropy(this.name, getGame().maskRandom()));
+            builder.addPayload(Payload.randomEntropy(this.name, mask));
+            if(this.rng.isGenerated()) {
+                const [share, proof] = getGame().unmaskShare(this.rng.mask());
+                builder.addPayload(Payload.randomReveal(this.name, share, proof));
+            }
             const block = mutGame(g => g.finishBlock(builder));
             await saveBlock(block, getGame().id);
             this.$parent.$parent.lastBlock = block;
@@ -73,7 +80,7 @@ export function render(_ctx, _cache) {
       (_ctx.state == 'waitReveal')
         ? (_openBlock(), _createBlock("div", _hoisted_6, "Waiting for reveal..."))
         : _createCommentVNode("", true),
-      (_ctx.state == 'generated')
+      (_ctx.state == 'revealed')
         ? (_openBlock(), _createBlock("div", _hoisted_7, _toDisplayString(_ctx.value), 1))
         : _createCommentVNode("", true)
     ])

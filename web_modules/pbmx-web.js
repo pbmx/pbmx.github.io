@@ -393,25 +393,25 @@ class Game {
     }
     /**
     * @param {Block} block
-    * @returns {Block}
+    * @returns {Block | undefined}
     */
     addBlock(block) {
         _assertClass(block, Block);
         var ptr0 = block.ptr;
         block.ptr = 0;
         var ret = wasm.game_addBlock(this.ptr, ptr0);
-        return Block.__wrap(ret);
+        return ret === 0 ? undefined : Block.__wrap(ret);
     }
     /**
     * @param {BlockBuilder} builder
-    * @returns {Block}
+    * @returns {Block | undefined}
     */
     finishBlock(builder) {
         _assertClass(builder, BlockBuilder);
         var ptr0 = builder.ptr;
         builder.ptr = 0;
         var ret = wasm.game_finishBlock(this.ptr, ptr0);
-        return Block.__wrap(ret);
+        return ret === 0 ? undefined : Block.__wrap(ret);
     }
     /**
     * @param {string} name
@@ -893,6 +893,29 @@ class Rng {
     mask() {
         var ret = wasm.rng_mask(this.ptr);
         return Mask.__wrap(ret);
+    }
+    /**
+    * @param {Fingerprint} party
+    * @param {Mask} mask
+    */
+    addEntropy(party, mask) {
+        _assertClass(party, Fingerprint);
+        _assertClass(mask, Mask);
+        wasm.rng_addEntropy(this.ptr, party.ptr, mask.ptr);
+    }
+    /**
+    * @returns {boolean}
+    */
+    isGenerated() {
+        var ret = wasm.rng_isGenerated(this.ptr);
+        return ret !== 0;
+    }
+    /**
+    * @returns {boolean}
+    */
+    isRevealed() {
+        var ret = wasm.rng_isRevealed(this.ptr);
+        return ret !== 0;
     }
     /**
     * @param {Game} game

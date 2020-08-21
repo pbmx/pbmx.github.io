@@ -8,6 +8,12 @@ import { Payload } from "/web_modules/pbmx-web.js";
 
 const defaultExport = {
     components: { rng },
+    data() {
+        return {
+            name: "",
+            spec: "",
+        };
+    },
     computed: {
         rngs() {
             return getGame().rngs();

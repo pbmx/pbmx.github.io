@@ -33,6 +33,7 @@ const defaultExport = {
             currentTab: tabs[0],
             lastBlock: null,
             exportedBlock: null,
+            publishing: false,
         };
     },
     methods: {
@@ -41,19 +42,20 @@ const defaultExport = {
             location.reload();
         },
         async publishBlock() {
+            this.publishing = true;
             await pushBlock(this.lastBlock);
+            this.publishing = false;
             this.exportedBlock = null;
         }
     },
 };
 
-import { renderList as _renderList, Fragment as _Fragment, openBlock as _openBlock, createBlock as _createBlock, toDisplayString as _toDisplayString, resolveDynamicComponent as _resolveDynamicComponent, createVNode as _createVNode, createTextVNode as _createTextVNode, createCommentVNode as _createCommentVNode } from "/web_modules/vue.js"
+import { renderList as _renderList, Fragment as _Fragment, openBlock as _openBlock, createBlock as _createBlock, toDisplayString as _toDisplayString, resolveDynamicComponent as _resolveDynamicComponent, createVNode as _createVNode, createCommentVNode as _createCommentVNode } from "/web_modules/vue.js"
 
 const _hoisted_1 = { class: "game" }
 const _hoisted_2 = { key: 0 }
 const _hoisted_3 = { class: "export-block" }
-const _hoisted_4 = /*#__PURE__*/_createTextVNode(" Copy this block and broadcast it to the other players ")
-const _hoisted_5 = { class: "block-output" }
+const _hoisted_4 = { class: "block-output" }
 
 export function render(_ctx, _cache) {
   return (_openBlock(), _createBlock("div", _hoisted_1, [
@@ -70,16 +72,17 @@ export function render(_ctx, _cache) {
     (_ctx.exportedBlock)
       ? (_openBlock(), _createBlock("div", _hoisted_2, [
           _createVNode("div", _hoisted_3, [
-            _hoisted_4,
             _createVNode("div", null, [
-              _createVNode("pre", _hoisted_5, _toDisplayString(_ctx.exportedBlock), 1)
+              _createVNode("pre", _hoisted_4, _toDisplayString(_ctx.exportedBlock), 1)
             ]),
             _createVNode("button", {
+              disabled: _ctx.publishing,
               onClick: _cache[1] || (_cache[1] = $event => (_ctx.publishBlock($event)))
-            }, "Publish"),
+            }, "Publish", 8, ["disabled"]),
             _createVNode("button", {
+              disabled: _ctx.publishing,
               onClick: _cache[2] || (_cache[2] = $event => (_ctx.exportedBlock = null))
-            }, "Done")
+            }, "Done", 8, ["disabled"])
           ])
         ]))
       : _createCommentVNode("", true),

@@ -2,7 +2,7 @@ import './block.css.proxy.js';
 
 import payload from "./payload.js";
 import { getGame } from "./state.js";
-import { shortFingerprint } from "./display.js";
+import { formatBase64, shortFingerprint } from "./display.js";
 
 const defaultExport = {
     components: { payload },
@@ -14,6 +14,11 @@ const defaultExport = {
         signer() {
             const signer = this.block.signer().export();
             return getGame().players().get(signer);
+        },
+    },
+    methods: {
+        getRaw() {
+            this.$parent.$parent.exportedBlock = formatBase64(this.block.export());
         },
     },
 };
@@ -38,7 +43,10 @@ export function render(_ctx, _cache) {
         key: payload.id().export(),
         payload: payload
       }, null, 8, ["payload"]))
-    }), 128 /* KEYED_FRAGMENT */))
+    }), 128 /* KEYED_FRAGMENT */)),
+    _createVNode("button", {
+      onClick: _cache[1] || (_cache[1] = $event => (_ctx.getRaw($event)))
+    }, "Raw")
   ]))
 }
 
